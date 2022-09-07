@@ -300,42 +300,44 @@ post.number_of_views # => '132'
 post.user_id # => '1'
 
 # 3
-# Create a single user
+# Create a single post
 
-repo = UserRepository.new
+repo = PostRepository.new
 
-user = User.new
-user.name = 'Jane'
-user.email = 'jane@makers.com'
+post = Post.new
+post.title = 'Golden square'
+post.content = 'OOD and TDD'
+post.number_of_views = 245
+post.user_id = 2
 
-repo.create(user)
+repo.create(post)
 
-repo.all.last.name # => 'Jane'
-repo.all.last.email # => 'jane@makers.com'
+repo.all.last.title # => 'Golden square'
+repo.all.last.content # => 'OOD and TDD'
 
 # 4
-# Delete a single user
+# Delete a single post
 
-repo = UserRepository.new
+repo = PostRepository.new
 
 repo.delete(1)
 
 repo.all.length #=> 1
 repo.all.first.id # => '2'
-repo.all.first.name # => 'Anna'
-repo.all.first.email # => 'anna@makers.com'
+repo.all.first.title # => 'Learning SQL'
+repo.all.first.content # => 'I have learned so much.'
 
 # 5
-# Update a single user
+# Update a single post
 
-repo = UserRepository.new
+repo = PostRepository.new
 
-user = repo.find(1)
-user.email = 'david@gmail.com'
-repo.update(user)
+post = repo.find(1)
+post.content = 'Today was HARD!'
+repo.update(post)
 
-updated_user = repo.find(1)
-updated_user.email # => 'david@gmail.com'
+updated_post = repo.find(1)
+updated_post.content # => 'Today was HARD!'
 
 
 # Add more examples for each method
