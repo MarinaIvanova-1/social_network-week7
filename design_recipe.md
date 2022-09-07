@@ -26,10 +26,10 @@ If seed data is provided (or you already created it), you can skip this step.
 ```sql
 
 
-TRUNCATE TABLE users RESTART IDENTITY;
+TRUNCATE TABLE post RESTART IDENTITY;
 
-INSERT INTO users (name, email) VALUES ('David', 'david@makers.com');
-INSERT INTO users (name, email) VALUES ('Anna', 'anna@makers.com');
+INSERT INTO post (name, email) VALUES ('David', 'david@makers.com');
+INSERT INTO post (name, email) VALUES ('Anna', 'anna@makers.com');
 
 
 
@@ -98,7 +98,7 @@ class UserRepository
   # No arguments
   def all
     # Executes the SQL query:
-    # SELECT id, name, email FROM users;
+    # SELECT id, name, email FROM post;
 
     # Returns an array of User objects.
   end
@@ -107,7 +107,7 @@ class UserRepository
   # One argument: the id (number)
   def find(id)
     # Executes the SQL query:
-    # SELECT id, name, email FROM users WHERE id = $1;
+    # SELECT id, name, email FROM post WHERE id = $1;
 
     # Returns a single User object.
   end
@@ -116,7 +116,7 @@ class UserRepository
   # Creates a new record
   def create(user)
     # Executes the SQL query:
-    # INSERT INTO users (name, email) VALUES ($1, $2);
+    # INSERT INTO post (name, email) VALUES ($1, $2);
 
     # returns nil
   end
@@ -124,7 +124,7 @@ class UserRepository
   # Deletes a record
   def delete(id)
     # Executes the SQL query:
-    # DELETE FROM users WHERE id = $1;
+    # DELETE FROM post WHERE id = $1;
 
     # returns nil
   end  
@@ -132,7 +132,54 @@ class UserRepository
   # Updates a record given
   def update(user)
     # Executes the SQL query:
-    # UPDATE users SET name = $1, email = $2 WHERE id = $3;
+    # UPDATE post SET name = $1, email = $2 WHERE id = $3;
+
+    # returns nil
+  end
+end
+
+
+
+class PostRepository
+
+  # Selecting all records
+  # No arguments
+  def all
+    # Executes the SQL query:
+    # SELECT id, title, content, number_of_views, user_id FROM posts;
+
+    # Returns an array of Post objects.
+  end
+
+  # Gets a single record by its ID
+  # One argument: the id (number)
+  def find(id)
+    # Executes the SQL query:
+    # SELECT id, title, content, number_of_views, user_id FROM posts WHERE id = $1;
+
+    # Returns a single Post object.
+  end
+
+  # Creates a new record
+  def create(post)
+    # Executes the SQL query:
+    # INSERT INTO posts (title, content, number_of_views, user_id) VALUES ($1, $2, $3, $4);
+
+    # returns nil
+  end
+
+  # Deletes a record
+  def delete(id)
+    # Executes the SQL query:
+    # DELETE FROM posts WHERE id = $1;
+
+    # returns nil
+  end  
+  
+  # Updates a record given
+  def update(post)
+    # Executes the SQL query:
+    # UPDATE posts SET title = $1, content = $2, number_of_views = $3, user_id = $4 WHERE id = $5
 
     # returns nil
   end
@@ -146,24 +193,24 @@ Write Ruby code that defines the expected behaviour of the Repository class, fol
 These examples will later be encoded as RSpec tests.
 
 ```ruby
-# EXAMPLES
 
+# USER REPOSITORY TESTS
 # 1
-# Get all users
+# Get all post
 
 repo = UserRepository.new
 
-users = repo.all
+post = repo.all
 
-users.length # =>  2
+post.length # =>  2
 
-users[0].id # =>  1
-users[0].name # =>  'David'
-users[0].email # =>  'david@makers.com'
+post[0].id # =>  1
+post[0].name # =>  'David'
+post[0].email # =>  'david@makers.com'
 
-users[1].id # =>  2
-users[1].name # =>  'Anna'
-users[1].email # =>  'anna@makers.com'
+post[1].id # =>  2
+post[1].name # =>  'Anna'
+post[1].email # =>  'anna@makers.com'
 
 # 2
 # Get a single user
@@ -216,6 +263,80 @@ updated_user.email # => 'david@gmail.com'
 
 
 
+# POST REPOSITORY TESTS
+# 1
+# Get all post
+
+repo = PostRepository.new
+
+posts = repo.all
+
+posts.length # =>  2
+
+posts[0].id # =>  1
+posts[0].title # =>  'First Day'
+posts[0].content # =>  'Today was a great day.'
+posts[0].number_of_views # => '132'
+posts[0].user_id # => '1'
+
+posts[1].id # =>  2
+posts[1].title # =>  'Learning SQL'
+posts[1].content # =>  'I have learned so much.'
+posts[1].number_of_views # => '472'
+posts[1].user_id # => '2'
+
+
+# 2
+# Get a single post
+
+repo = PostRepository.new
+
+post = repo.find(1)
+
+post.id # =>  1
+post.title # =>  'First Day'
+post.content # =>  'Today was a great day.'
+post.number_of_views # => '132'
+post.user_id # => '1'
+
+# 3
+# Create a single user
+
+repo = UserRepository.new
+
+user = User.new
+user.name = 'Jane'
+user.email = 'jane@makers.com'
+
+repo.create(user)
+
+repo.all.last.name # => 'Jane'
+repo.all.last.email # => 'jane@makers.com'
+
+# 4
+# Delete a single user
+
+repo = UserRepository.new
+
+repo.delete(1)
+
+repo.all.length #=> 1
+repo.all.first.id # => '2'
+repo.all.first.name # => 'Anna'
+repo.all.first.email # => 'anna@makers.com'
+
+# 5
+# Update a single user
+
+repo = UserRepository.new
+
+user = repo.find(1)
+user.email = 'david@gmail.com'
+repo.update(user)
+
+updated_user = repo.find(1)
+updated_user.email # => 'david@gmail.com'
+
 
 # Add more examples for each method
 ```
@@ -233,15 +354,15 @@ This is so you get a fresh table contents every time you run the test suite.
 
 # file: spec/user_repository_spec.rb
 
-def reset_users_table
-  seed_sql = File.read('spec/seeds_users.sql')
+def reset_post_table
+  seed_sql = File.read('spec/seeds_post.sql')
   connection = PG.connect({ host: '127.0.0.1', dbname: 'social_network_test' })
   connection.exec(seed_sql)
 end
 
 describe UserRepository do
   before(:each) do 
-    reset_users_table
+    reset_post_table
   end
 
   # (your tests will go here).

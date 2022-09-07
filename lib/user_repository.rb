@@ -23,34 +23,40 @@ class UserRepository
   # Gets a single record by its ID
   # One argument: the id (number)
   def find(id)
-    # Executes the SQL query:
-    # SELECT id, name, email FROM users WHERE id = $1;
+    sql = "SELECT id, name, email FROM users WHERE id = $1;"
+    result_list = DatabaseConnection.exec_params(sql, [id])
+    record = result_list.first
+    user = User.new
+    user.id = record['id']
+    user.name = record['name']
+    user.email = record['email']
 
-    # Returns a single User object.
+    return user
   end
 
 
   # Creates a new record
   def create(user)
-    # Executes the SQL query:
-    # INSERT INTO users (name, email) VALUES ($1, $2);
+    sql = "INSERT INTO users (name, email) VALUES ($1, $2);"
+    DatabaseConnection.exec_params(sql, [user.name, user.email])
 
-    # returns nil
+    return nil
   end
 
   # Deletes a record
   def delete(id)
-    # Executes the SQL query:
-    # DELETE FROM users WHERE id = $1;
+    sql = "DELETE FROM users WHERE id = $1;"
+    DatabaseConnection.exec_params(sql, [id])
 
-    # returns nil
+    return nil
   end  
   
   # Updates a record given
   def update(user)
-    # Executes the SQL query:
-    # UPDATE users SET name = $1, email = $2 WHERE id = $3;
+    sql = "UPDATE users SET name = $1, email = $2 WHERE id = $3;"
+    params = [user.name, user.email, user.id]
+    DatabaseConnection.exec_params(sql, params)
 
-    # returns nil
+    return nil
   end
 end
