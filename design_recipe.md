@@ -1,4 +1,4 @@
-# {{TABLE NAME}} Model and Repository Classes Design Recipe
+# Social Network Model and Repository Classes Design Recipe
 
 _Copy this recipe template to design and implement Model and Repository classes for a database table._
 
@@ -8,15 +8,13 @@ If the table is already created in the database, you can skip this step.
 
 Otherwise, [follow this recipe to design and create the SQL schema for your table](./single_table_design_recipe_template.md).
 
-*In this template, we'll use an example table `students`*
 
 ```
-# EXAMPLE
 
-Table: students
-
-Columns:
-id | name | cohort_name
+| Record                | Properties          |
+| --------------------- | ------------------  |
+| user                  | name, email
+| post                  | title, content, number_of_views
 ```
 
 ## 2. Create Test SQL seeds
@@ -26,22 +24,22 @@ Your tests will depend on data stored in PostgreSQL to run.
 If seed data is provided (or you already created it), you can skip this step.
 
 ```sql
--- EXAMPLE
--- (file: spec/seeds_{table_name}.sql)
 
--- Write your SQL seed here. 
 
--- First, you'd need to truncate the table - this is so our table is emptied between each test run,
--- so we can start with a fresh state.
--- (RESTART IDENTITY resets the primary key)
+TRUNCATE TABLE users RESTART IDENTITY;
 
-TRUNCATE TABLE students RESTART IDENTITY; -- replace with your own table name.
+INSERT INTO users (name, email) VALUES ('David', 'david@makers.com');
+INSERT INTO users (name, email) VALUES ('Anna', 'anna@makers.com');
 
--- Below this line there should only be `INSERT` statements.
--- Replace these statements with your own seed data.
 
-INSERT INTO students (name, cohort_name) VALUES ('David', 'April 2022');
-INSERT INTO students (name, cohort_name) VALUES ('Anna', 'May 2022');
+
+TRUNCATE TABLE posts RESTART IDENTITY;
+
+INSERT INTO posts (title, content, number_of_views, user_id) VALUES ('First Day', 'Today was a great day.', 132, 1);
+INSERT INTO posts (title, content, number_of_views, user_id) VALUES ('Learning SQL', 'I have learned so much.', 472, 2);
+
+
+
 ```
 
 Run this SQL file on the database to truncate (empty) the table, and insert the seed data. Be mindful of the fact any existing records in the table will be deleted.
@@ -55,17 +53,16 @@ psql -h 127.0.0.1 your_database_name < seeds_{table_name}.sql
 Usually, the Model class name will be the capitalised table name (single instead of plural). The same name is then suffixed by `Repository` for the Repository class name.
 
 ```ruby
-# EXAMPLE
-# Table name: students
-
-# Model class
-# (in lib/student.rb)
-class Student
+class User
 end
 
-# Repository class
-# (in lib/student_repository.rb)
-class StudentRepository
+class UserRepository
+end
+
+class Post
+end
+
+class PostRepository
 end
 ```
 
@@ -74,25 +71,14 @@ end
 Define the attributes of your Model class. You can usually map the table columns to the attributes of the class, including primary and foreign keys.
 
 ```ruby
-# EXAMPLE
-# Table name: students
-
-# Model class
-# (in lib/student.rb)
-
-class Student
-
-  # Replace the attributes by your own columns.
-  attr_accessor :id, :name, :cohort_name
+class User
+  attr_accessor :id, :name, :email
 end
 
-# The keyword attr_accessor is a special Ruby feature
-# which allows us to set and get attributes on an object,
-# here's an example:
-#
-# student = Student.new
-# student.name = 'Jo'
-# student.name
+class Post
+  attr_accessor :id, :title, :content, :number_of_views, :user_id
+end
+
 ```
 
 *You may choose to test-drive this class, but unless it contains any more logic than the example above, it is probably not needed.*
@@ -104,42 +90,52 @@ Your Repository class will need to implement methods for each "read" or "write" 
 Using comments, define the method signatures (arguments and return value) and what they do - write up the SQL queries that will be used by each method.
 
 ```ruby
-# EXAMPLE
-# Table name: students
 
-# Repository class
-# (in lib/student_repository.rb)
 
-class StudentRepository
+class UserRepository
 
   # Selecting all records
   # No arguments
   def all
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students;
+    # SELECT id, name, email FROM users;
 
-    # Returns an array of Student objects.
+    # Returns an array of User objects.
   end
 
   # Gets a single record by its ID
   # One argument: the id (number)
   def find(id)
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students WHERE id = $1;
+    # SELECT id, name, email FROM users WHERE id = $1;
 
-    # Returns a single Student object.
+    # Returns a single User object.
   end
 
-  # Add more methods below for each operation you'd like to implement.
 
-  # def create(student)
-  # end
+  # Creates a new record
+  def create(user)
+    # Executes the SQL query:
+    # INSERT INTO users (name, email) VALUES ($1, $2);
 
-  # def update(student)
-  # end
+    # returns nil
+  end
 
-  # def delete(student)
-  # end
+  # Deletes a record
+  def delete(id)
+    # Executes the SQL query:
+    # DELETE FROM users WHERE id = $1;
+
+    # returns nil
+  end  
+  
+  # Updates a record given
+  def update(user)
+    # Executes the SQL query:
+    # UPDATE users SET name = $1, email = $2 WHERE id = $3;
+
+    # returns nil
+  end
 end
 ```
 
