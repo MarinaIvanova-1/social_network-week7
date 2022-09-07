@@ -149,32 +149,73 @@ These examples will later be encoded as RSpec tests.
 # EXAMPLES
 
 # 1
-# Get all students
+# Get all users
 
-repo = StudentRepository.new
+repo = UserRepository.new
 
-students = repo.all
+users = repo.all
 
-students.length # =>  2
+users.length # =>  2
 
-students[0].id # =>  1
-students[0].name # =>  'David'
-students[0].cohort_name # =>  'April 2022'
+users[0].id # =>  1
+users[0].name # =>  'David'
+users[0].email # =>  'david@makers.com'
 
-students[1].id # =>  2
-students[1].name # =>  'Anna'
-students[1].cohort_name # =>  'May 2022'
+users[1].id # =>  2
+users[1].name # =>  'Anna'
+users[1].email # =>  'anna@makers.com'
 
 # 2
-# Get a single student
+# Get a single user
 
-repo = StudentRepository.new
+repo = UserRepository.new
 
-student = repo.find(1)
+user = repo.find(1)
 
-student.id # =>  1
-student.name # =>  'David'
-student.cohort_name # =>  'April 2022'
+user.id # =>  1
+user.name # =>  'David'
+user.email # =>  'david@makers.com'
+
+# 3
+# Create a single user
+
+repo = UserRepository.new
+
+user = User.new
+user.name = 'Jane'
+user.email = 'jane@makers.com'
+
+repo.create(user)
+
+repo.all.last.name # => 'Jane'
+repo.all.last.email # => 'jane@makers.com'
+
+# 4
+# Delete a single user
+
+repo = UserRepository.new
+
+repo.delete(1)
+
+repo.all.length #=> 1
+repo.all.first.id # => '2'
+repo.all.first.name # => 'Anna'
+repo.all.first.email # => 'anna@makers.com'
+
+# 5
+# Update a single user
+
+repo = UserRepository.new
+
+user = repo.find(1)
+user.email = 'david@gmail.com'
+repo.update(user)
+
+updated_user = repo.find(1)
+updated_user.email # => 'david@gmail.com'
+
+
+
 
 # Add more examples for each method
 ```
@@ -190,17 +231,17 @@ This is so you get a fresh table contents every time you run the test suite.
 ```ruby
 # EXAMPLE
 
-# file: spec/student_repository_spec.rb
+# file: spec/user_repository_spec.rb
 
-def reset_students_table
-  seed_sql = File.read('spec/seeds_students.sql')
-  connection = PG.connect({ host: '127.0.0.1', dbname: 'students' })
+def reset_users_table
+  seed_sql = File.read('spec/seeds_users.sql')
+  connection = PG.connect({ host: '127.0.0.1', dbname: 'social_network_test' })
   connection.exec(seed_sql)
 end
 
-describe StudentRepository do
+describe UserRepository do
   before(:each) do 
-    reset_students_table
+    reset_users_table
   end
 
   # (your tests will go here).
